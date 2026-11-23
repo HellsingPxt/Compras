@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lista de Compras</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2e7d5b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Compras">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#faf8f5;--card:#fff;--tx:#222;--mu:#777;--ac:#2e7d5b;--bd:#e5e0d8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17191a;--card:#222527;--tx:#eee;--mu:#9a9a9a;--ac:#5cc596;--bd:#34383a}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.35 system-ui,sans-serif;padding:0 12px 40px}
+header{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:10px 0;z-index:5;border-bottom:1px solid var(--bd)}
+h1{font-size:18px;margin:0 0 6px}
+.bar{height:6px;background:var(--bd);border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ac);width:0;transition:width .2s}
+.st{font-size:12px;color:var(--mu);margin-top:5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
+.st b{color:var(--tx)}
+h2{font-size:14px;margin:18px 0 6px;color:var(--ac);text-transform:uppercase;letter-spacing:.04em;display:flex;justify-content:space-between}
+h2 small{color:var(--mu);font-weight:400}
+.r{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;margin-bottom:6px}
+.top{display:flex;gap:10px;align-items:flex-start}
+.top input{width:22px;height:22px;accent-color:var(--ac);flex:none;margin:1px 0 0}
+.t{flex:1;min-width:0}.n{font-weight:600}.m{font-size:12.5px;color:var(--mu)}
+.dn .n{text-decoration:line-through;opacity:.55}
+.x{border:0;background:none;color:var(--mu);font-size:16px;padding:0 2px;margin:0}
+.pr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}
+.pr label{font-size:11px;color:var(--mu);display:block}
+input[type=number],input[type=text]{width:100%;box-sizing:border-box;padding:7px 6px;border:1px solid var(--bd);border-radius:6px;background:var(--bg);color:var(--tx);font-size:14px;margin-top:2px}
+.pr .cu input{border-color:var(--ac)}
+button{padding:10px 14px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:8px;font-size:14px}
+.add{width:100%;border-style:dashed;color:var(--ac);margin-bottom:4px}
+.fm{background:var(--card);border:1px solid var(--ac);border-radius:10px;padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.fm .w{grid-column:1/3}.fm button.ok{background:var(--ac);color:#fff;border-color:var(--ac)}
+.ft{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.note{font-size:12px;color:var(--mu);margin-top:14px}
+</style></head><body>
+<header><h1>🛒 Lista Mensal · 2 adultos + 1 criança</h1><div class="bar"><i id="b"></i></div>
+<div class="st"><span id="c"></span><span id="s"></span></div><div class="st"><span id="v"></span></div></header>
+<main id="m"></main>
+<div class="ft"><button data-newcat="1">+ Nova categoria</button><button data-reset="1">🔄 Nova compra (limpar marcações)</button></div>
+<p class="note">Valores em R$ por item (quantidade total). Mín/Máx são editáveis; ao informar o “Pago hoje”, o item é marcado como comprado e o Mín/Máx se ajusta se o preço sair da faixa. Estimativas iniciais aproximadas.</p>
+<script>
+const D={
+"Mercearia básica":[
+["Arroz","Tio João / Camil",'5 kg',24,34],["Feijão vermelho","Camil / Kicaldo",'5 kg',35,55],["Macarrão","Renata / Adria",'2 pct 500 g',8,14],["Farinha de trigo","Dona Benta",'1 kg',5,8],["Farinha de mandioca / farofa","Yoki",'1 kg',7,12],["Flocão de milho / fubá","Yoki",'500 g',3,6],["Aveia em flocos","Quaker",'1 pct',6,10],["Açúcar","União / Caravelas",'10 kg',40,55],["Sal refinado","Cisne",'1 kg',2,4],["Café em pó","Pilão / 3 Corações",'1 kg',45,70],["Óleo de soja / girassol","Soya / Liza",'4 × 900 ml',28,40],["Azeite de oliva","Gallo / Andorinha",'500 ml',35,60],["Molho de tomate","Elefante",'1 lata',4,7],["Batata palha","Yoki / Hikari",'500 g',15,25],["Creme de leite","Nestlé / Piracanjuba",'6 un',24,40],["Leite condensado","Moça",'2 un',14,22],["Biscoitos variados","Diversas",'4 pct',14,28],["Batata pré-cozida","Bem Brasil",'1 saco',18,30],["Morango congelado","Diversas",'4 pct',28,50]],
+"Açougue e frios":[
+["Carne bovina (moída, iscas, panela)","Açougue / mercado",'4 kg',160,280],["Frango (filé, coxa/sobrecoxa)","Sadia / Seara",'4 kg',40,70],["Carne suína / linguiça","Seara / açougue",'1,5 kg',35,60],["Peixe (tilápia ou merluza)","Congelado",'1 a 1,5 kg',35,65],["Ovos","Branco / vermelho",'30 un',20,30],["Queijo muçarela fatiado","Tirolez / Président",'600–800 g',30,50],["Presunto ou peito de peru","Sadia / Perdigão",'300–400 g',15,30],["Manteiga","Aviação / Président",'2 × 500 g',70,110]],
+"Laticínios e bebidas":[
+["Leite integral / composto lácteo","Glória",'3 pct',15,22],["Iogurte natural integral","Nestlé / Piracanjuba",'4 × 1 L',24,40],["Suco integral / natural","Del Valle / Natural One",'2 × 980 ml',20,36]],
+"Hortifrúti (semanal)":[
+["Alho","—",'5 cabeças',6,12],["Cebola","—",'7 un',6,10],["Cheiro-verde","—",'1 maço',3,5],["Tomate","—",'7 un',8,14],["Batata inglesa","—",'1 kg',6,10],["Cenoura","—",'5 un',5,9],["Brócolis","—",'1 un',5,9],["Alface","—",'1 pé',3,6],["Banana","—",'1 dúzia',6,10],["Maçã","—",'6 un',10,16],["Mamão formosa","—",'1 un',6,10],["Laranja","—",'6 un',5,9],["Limão","—",'10 un',5,9],["Fruta extra da estação","—",'1 un / bandeja',8,15]],
+"Itens infantis (2 anos)":[
+["Fraldas descartáveis","Huggies tam. G",'2 × 96 un',220,300],["Lenços umedecidos","Huggies / Turma da Mônica",'4 pct',20,40],["Pomada para assaduras","Hipoglós / Bepantol",'1 tubo grande',25,40],["Shampoo infantil","Johnson's / Granado Bebê",'1 frasco',12,20],["Sabonete líquido infantil","Johnson's / Granado Bebê",'1 frasco',12,22],["Creme dental infantil c/ flúor","Colgate / Condor",'1 tubo',6,12]],
+"Limpeza":[
+["Sabão líquido ou em pó","Tixan Ypê",'2 × 2,4 kg',50,76],["Amaciante","Downy",'2 L',20,32],["Detergente líquido","Ypê / Limpol",'5 L',18,28],["Água sanitária","Qboa / Candida",'2 L',5,9],["Desinfetante","Pinho Sol / Veja",'2 L',8,15],["Álcool 70% / multiuso","Start / Veja",'2 frascos',12,22],["Esponja de louça","Scotch-Brite",'4 un',6,12],["Saco de lixo 30 L","Diversas",'1 rolo',5,10],["Saco de lixo 50 L","Diversas",'1 rolo',6,12],["Papel toalha","Snob / Scott",'2 pct',8,16]],
+"Higiene pessoal":[
+["Papel higiênico folha dupla","Neve / Personal",'16 rolos',25,45],["Sabonete","Dove",'6 un',18,30],["Creme dental adulto","Colgate / Oral-B",'2 tubos',8,16],["Shampoo adulto","—",'1 frasco',12,25],["Condicionador adulto","—",'1 frasco',12,25],["Desodorante masculino","Rexona",'1 un',12,18],["Desodorante feminino","Rexona",'1 un',12,18],["Absorventes","Intimus",'30 un',14,28],["Hidratante corporal","Dove",'1 un',20,35],["Desodorante rolo (Serum Cream)","Dove",'1 un',14,22],["Hidratante ureia 10% (pés)","Diversas",'1 un',20,40]]};
+const f=n=>'R$ '+(+n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let L=[],C=[],open=null,ed=null,cats=[];
+try{const o=JSON.parse(localStorage.getItem('lc2')||'null');if(o){L=o.L;C=o.C}}catch(e){}
+if(!L.length){let i=0;for(const[s,l]of Object.entries(D))l.forEach(x=>L.push({id:'p'+i++,c:s,n:x[0],b:x[1]==='—'?'':x[1],q:x[2],mn:x[3],mx:x[4],cu:'',d:0}))}
+function save(){try{localStorage.setItem('lc2',JSON.stringify({L,C}))}catch(e){}}
+const num=(k,x,l)=>`<label>${l}<input type="number" inputmode="decimal" step="0.01" min="0" data-id="${x.id}" data-k="${k}" value="${x[k]}"></label>`;
+function row(x){return `<div class="r ${x.d?'dn':''}"><div class="top"><input type="checkbox" data-id="${x.id}" data-k="d" ${x.d?'checked':''}><span class="t"><div class="n">${esc(x.n)}</div><div class="m">${x.b?esc(x.b)+' · ':''}${esc(x.q)}</div></span><button class="x" data-edit="${x.id}" title="Editar">✎</button><button class="x" data-del="${x.id}">✕</button></div><div class="pr">${num('mn',x,'Mín (R$)')}${num('mx',x,'Máx (R$)')}<span class="cu">${num('cu',x,'Pago hoje')}</span></div></div>`}
+function form(x){x=x||{};return `<div class="fm"><input class="w" type="text" id="fn" placeholder="Nome do produto" value="${esc(x.n||'')}"><input type="text" id="fb" placeholder="Marca / modelo" value="${esc(x.b||'')}"><input type="text" id="fq" placeholder="Quantidade" value="${esc(x.q||'')}"><input type="number" inputmode="decimal" id="fmn" placeholder="Mín R$" value="${x.mn??''}"><input type="number" inputmode="decimal" id="fmx" placeholder="Máx R$" value="${x.mx??''}"><button data-cancel="1">Cancelar</button><button class="ok" ${x.id?`data-save="${x.id}"`:'data-ok="1"'}>${x.id?'Salvar':'Adicionar'}</button></div>`}
+function render(){
+ cats=[...new Set([...L.map(x=>x.c),...C])];let h='';
+ cats.forEach((c,i)=>{const it=L.filter(x=>x.c===c);
+  h+=`<h2>${esc(c)}<small>${it.filter(x=>x.d).length}/${it.length}</small></h2>`+it.map(x=>x.id===ed?form(x):row(x)).join('')+(open===i?form():`<button class="add" data-add="${i}">+ Adicionar produto</button>`)});
+ m.innerHTML=h;stats()}
+function stats(){const d=L.filter(x=>x.d),r=L.filter(x=>!x.d);
+ const sp=d.reduce((a,x)=>a+(+x.cu||0),0);
+ c.innerHTML=`<b>${d.length}</b> de ${L.length} comprados`;
+ s.innerHTML=`Gasto: <b>${f(sp)}</b>`;
+ v.innerHTML=`Falta (estimado): <b>${f(r.reduce((a,x)=>a+(+x.mn||0),0))} – ${f(r.reduce((a,x)=>a+(+x.mx||0),0))}</b>`;
+ document.getElementById('b').style.width=(L.length?d.length/L.length*100:0)+'%'}
+m.addEventListener('change',e=>{const t=e.target,x=L.find(y=>y.id===t.dataset.id);if(!x)return;const k=t.dataset.k;
+ if(k==='d')x.d=t.checked?1:0;
+ else{const v=t.value===''?'':parseFloat(t.value);x[k]=v;
+  if(k==='cu'&&v!==''){if(v<x.mn)x.mn=v;if(v>x.mx)x.mx=v;x.d=1}}
+ save();render()});
+document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;const g=t.dataset;
+ if(g.del){const x=L.find(y=>y.id===g.del);if(x&&confirm('Remover "'+x.n+'"?')){L=L.filter(y=>y!==x);save();render()}}
+ else if(g.add!==undefined){open=+g.add;ed=null;render();document.getElementById('fn').focus()}
+ else if(g.edit){ed=g.edit;open=null;render();fn.focus()}
+ else if(g.save){const x=L.find(y=>y.id===g.save),n=fn.value.trim();if(!n){fn.focus();return}x.n=n;x.b=fb.value.trim();x.q=fq.value.trim()||x.q;x.mn=parseFloat(fmn.value)||0;x.mx=parseFloat(fmx.value)||0;ed=null;save();render()}
+ else if(g.cancel){open=null;ed=null;render()}
+ else if(g.ok){const n=fn.value.trim();if(!n){fn.focus();return}
+  L.push({id:'n'+Date.now(),c:cats[open],n,b:fb.value.trim(),q:fq.value.trim()||'1 un',mn:parseFloat(fmn.value)||0,mx:parseFloat(fmx.value)||0,cu:'',d:0});open=null;save();render()}
+ else if(g.newcat){const n=(prompt('Nome da nova categoria:')||'').trim();if(n&&!cats.includes(n)){C.push(n);open=cats.length;save();render()}}
+ else if(g.reset){if(confirm('Limpar marcações e valores pagos? Mín/Máx e produtos ficam salvos.')){L.forEach(x=>{x.d=0;x.cu=''});save();render()}}});
+render();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script></body></html>
